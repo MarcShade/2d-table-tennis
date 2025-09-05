@@ -20,7 +20,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             engine.key_set.add(event.key)
         elif event.type == pygame.KEYUP:
-            engine.key_set.discard(event.key)  # discard avoids KeyError
+            engine.key_set.discard(event.key)   
 
     engine.update()
     pygame.display.update()
