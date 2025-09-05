@@ -9,7 +9,7 @@ PADDLE_SPEED = 25 # move to paddle.py if and only if we decide to do powerups or
 
 class GameEngine:
     def __init__(self, fr: int, position: list, surface):
-        self.ball = PhysicsObject(position, [50, 1], [0, 10])
+        self.ball = PhysicsObject(position, [50, 1], 10)
         self.dt = 1/fr
         self.paddles = [Paddle(30, 700, 5, 100), Paddle(1570, 700, 5, 100)]
         self.surface = surface
@@ -24,18 +24,18 @@ class GameEngine:
         self.update_screen()
 
     def update_position(self):
-        self.ball.velocity[0] = self.ball.velocity[0] + self.ball.acceleration[0] * self.dt
-        self.ball.velocity[1] = self.ball.velocity[1] + self.ball.acceleration[1] * self.dt
+        # gravity
+        self.ball.velocity[1] = self.ball.velocity[1] + self.ball.acceleration * self.dt
 
         self.ball.position[0] = self.ball.position[0] + self.ball.velocity[0] * self.dt
         self.ball.position[1] = self.ball.position[1] + self.ball.velocity[1] * self.dt
     
     def update_collision(self):
-        if self.ball.position[1] > 900:
+        if (self.ball.position[1] + 10) > 900:
             self.ball.velocity[0] = self.ball.velocity[0]
             self.ball.velocity[1] = -self.ball.velocity[1]
 
-        if self.ball.position[0] < 0 or self.ball.position[0] > 1600:
+        if (self.ball.position[0] - 10) < 0 or (self.ball.position[0] + 10) > 1600:
             self.ball.velocity[0] = -self.ball.velocity[0]
             self.ball.velocity[1] = self.ball.velocity[1]
     

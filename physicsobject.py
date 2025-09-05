@@ -1,7 +1,7 @@
 class PhysicsObject:
     position: list
     velocity: list
-    acceleration: list
+    acceleration: int
 
     def __init__(self, p: list, v: list, a: list):
         self.position = p
