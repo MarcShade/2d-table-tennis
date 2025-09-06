@@ -3,8 +3,7 @@ from pygame.locals import *
 
 from physicsobject import PhysicsObject
 from paddle import Paddle
-
-from math import sin, cos, pi
+from VecMath import VectorMath
 
 RED_PADDLE_PATH = "Assets/Images/redbat.png"
 BLACK_PADDLE_PATH = "Assets/Images/blackbat.webp"
@@ -57,13 +56,9 @@ class GameEngine:
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
 
-        pygame.draw.line(self.surface,  WHITE,  (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
-        pygame.draw.line(self.surface,  WHITE,  (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
-
-        print((0, self.paddles[1].b), (500, self.paddles[1].a * 500 - self.paddles[1].b))
-
-
-
+        pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
+        pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
+        pygame.draw.line(self.surface, WHITE, self.ball.position, VectorMath.add(self.ball.position, VectorMath.scalar_mult(self.ball.velocity, 50/VectorMath.length(self.ball.velocity))))
 
     def handle_input(self):
         # Position
