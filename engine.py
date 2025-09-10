@@ -53,14 +53,19 @@ class GameEngine:
             self.ball.velocity[1] *= -1
         
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] < 0:
-            # (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
-            theta = self.paddles[0].angle if self.paddles[0].angle > 0 else 180 + self.paddles[0].angle
-            # dir_vec = [cos(theta), sin(theta)]
-            alpha = atan(1 / (1 / -self.paddles[0].a))
-            alpha_1 = 90 - alpha
-            mu = theta + (180 - alpha_1)
-            # self.ball.velocity[0] = -self.ball.velocity[0]
-            self.ball.velocity = VectorMath.scalar_mult([cos(mu), sin(mu)], VectorMath.length(self.ball.velocity))
+            print(self.ball.velocity)
+            (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
+            y = -y
+            theta = self.paddles[0].angle if self.paddles[0].angle > 0 else 180 + self.paddles[0].angle # Angle between line and x-axis
+            alpha = atan(-y/x) * 180 / pi # Angle between velocity vector and x-axis 
+            beta = 90 + atan(-self.paddles[0].a) * 180 / pi # Angle between normal and x-axis
+            print(f"v = ({x}, {y})")
+            # print(self.paddles[0].a)
+            # print(theta)
+            print(alpha)
+            print(beta)
+            print(f"{-self.paddles[0].a}x")
+            input(">   ")
         
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
             self.ball.velocity[0] = -self.ball.velocity[0]
