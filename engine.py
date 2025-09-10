@@ -6,7 +6,8 @@ from paddle import Paddle
 from VecMath import VectorMath
 
 RED_PADDLE_PATH = "Assets/Images/redbat.png"
-BLACK_PADDLE_PATH = "Assets/Images/blackbat.webp"
+BLACK_PADDLE_PATH = "Assets/Images/blackbat.png"
+TABLE_PATH = "Assets/Images/table.png"
 
 WHITE = (255, 255, 255)
 PADDLE_SPEED = 50 # move to paddle.py if and only if we decide to do powerups or special abilities someday
@@ -19,6 +20,8 @@ class GameEngine:
         self.surface = surface
         self.running = True
         self.key_set = set() # Keeping track of what keys are pressed, because Pygame and I are opps
+        self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
+        self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
 
     def update(self):
         self.handle_input()
@@ -49,12 +52,19 @@ class GameEngine:
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
             self.ball.velocity[0] = -self.ball.velocity[0]
 
+        if (self.ball.position[1] > 675 and self.ball.velocity[1] == abs(self.ball.velocity[1])):
+            self.ball.velocity[1] *= -1
+
     
     def update_screen(self):
+        self.surface.blit(self.table_image, self.table_image.get_rect(center = self.table_image.get_rect(center = [800, 775]).center))
+        
         pygame.draw.circle(self.surface, WHITE, self.ball.position, 10)
 
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
+
+
 
         pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
         pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))

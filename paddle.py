@@ -12,7 +12,7 @@ class Paddle:
         self.prev_angle = 0
         self.height = 150
 
-        self.image = pygame.image.load(path)
+        self.image = pygame.image.load(path).convert_alpha()
         self.image = pygame.transform.scale(self.image, (150, self.height)) # The width is a magic number since I will neither be changing it or referencing it
 
         self.a = 0

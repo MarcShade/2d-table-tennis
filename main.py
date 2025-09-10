@@ -9,7 +9,7 @@ surface = pygame.display.set_mode((1600, 900))
 pygame.display.set_caption("2D Ping Pong")
 
 engine = GameEngine(FRAMERATE, [800, 450], surface)
-background = pygame.image.load("./Assets/Images/background.jpg")
+background = pygame.image.load("./Assets/Images/background.jpg").convert()
 running = True
 
 while running:
