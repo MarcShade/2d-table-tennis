@@ -5,6 +5,8 @@ from physicsobject import PhysicsObject
 from paddle import Paddle
 from VecMath import VectorMath
 
+from math import cos, sin, atan, pi
+
 RED_PADDLE_PATH = "Assets/Images/redbat.png"
 BLACK_PADDLE_PATH = "Assets/Images/blackbat.png"
 TABLE_PATH = "Assets/Images/table.png"
@@ -38,6 +40,7 @@ class GameEngine:
 
         self.ball.position[0] = self.ball.position[0] + self.ball.velocity[0] * self.dt
         self.ball.position[1] = self.ball.position[1] + self.ball.velocity[1] * self.dt
+
     
     def update_collision(self):
         if (self.ball.position[1] + 10) > 900:
@@ -45,9 +48,19 @@ class GameEngine:
 
         if (self.ball.position[0] - 10) < 0 or (self.ball.position[0] + 10) > 1600:
             self.ball.velocity[0] = -self.ball.velocity[0]
+
+        if (self.ball.position[1] < 0):
+            self.ball.velocity[1] *= -1
         
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] < 0:
-            self.ball.velocity[0] = -self.ball.velocity[0]
+            # (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
+            theta = self.paddles[0].angle if self.paddles[0].angle > 0 else 180 + self.paddles[0].angle
+            # dir_vec = [cos(theta), sin(theta)]
+            alpha = atan(1 / (1 / -self.paddles[0].a))
+            alpha_1 = 90 - alpha
+            mu = theta + (180 - alpha_1)
+            # self.ball.velocity[0] = -self.ball.velocity[0]
+            self.ball.velocity = VectorMath.scalar_mult([cos(mu), sin(mu)], VectorMath.length(self.ball.velocity))
         
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
             self.ball.velocity[0] = -self.ball.velocity[0]
@@ -64,7 +77,7 @@ class GameEngine:
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
 
-
+        # print(self.paddles[0].angle)
 
         pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
         pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
