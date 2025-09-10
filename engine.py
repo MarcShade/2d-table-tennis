@@ -53,22 +53,42 @@ class GameEngine:
             self.ball.velocity[1] *= -1
         
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] < 0:
-            print(self.ball.velocity)
             (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
             y = -y
-            theta = self.paddles[0].angle if self.paddles[0].angle > 0 else 180 + self.paddles[0].angle # Angle between line and x-axis
-            alpha = atan(-y/x) * 180 / pi # Angle between velocity vector and x-axis 
-            beta = 90 + atan(-self.paddles[0].a) * 180 / pi # Angle between normal and x-axis
-            print(f"v = ({x}, {y})")
-            # print(self.paddles[0].a)
-            # print(theta)
-            print(alpha)
-            print(beta)
-            print(f"{-self.paddles[0].a}x")
-            input(">   ")
+            alpha = atan(-y/x) * -180 / pi # Angle between velocity vector and x-axis
+            _beta = 90 + atan(-self.paddles[0].a) * 180 / pi
+            beta = _beta if _beta < 90 else -180 + _beta
+            epsilon = 2 * beta - alpha
+            # epsilon =  beta - 90 + 180 - (90 - (beta - alpha))
+            epsilon = 360 - epsilon
+            epsilon = epsilon * pi / 180
+            # print(f"v = ({x}, {y})")
+            # print(f"alpha: {alpha}")
+            # print(f"_beta: {_beta}")
+            # print(f"beta: {beta}")
+            # print(f"epslion: {epsilon}")
+            # print(f"{-self.paddles[0].a}x")
+            # input(">   ")
+            self.ball.velocity = VectorMath.scalar_mult([cos(epsilon), sin(epsilon)], VectorMath.length(self.ball.velocity))
         
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
-            self.ball.velocity[0] = -self.ball.velocity[0]
+            (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
+            y = -y
+            alpha = atan(-y/x) * 180 / pi # Angle between velocity vector and x-axis
+            _beta = 90 + atan(-self.paddles[1].a) * 180 / pi
+            beta = _beta if _beta < 90 else 180 - _beta
+            # epsilon = 2 * beta - alpha
+            epsilon =  180 + beta - 90 + 180 - 90 + alpha + beta
+            epsilon = 180 + epsilon
+            epsilon = epsilon * pi / 180
+            print(f"v = ({x}, {y})")
+            print(f"alpha: {alpha}")
+            print(f"_beta: {_beta}")
+            print(f"beta: {beta}")
+            print(f"epslion: {epsilon}")
+            print(f"{-self.paddles[1].a}x")
+            # input(">   ")
+            self.ball.velocity = VectorMath.scalar_mult([cos(epsilon), sin(epsilon)], VectorMath.length(self.ball.velocity))
 
         if (self.ball.position[1] > 675 and self.ball.velocity[1] == abs(self.ball.velocity[1])):
             self.ball.velocity[1] *= -1
