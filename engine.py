@@ -15,7 +15,7 @@ class GameEngine:
     def __init__(self, fr: int, position: list, surface):
         self.ball = PhysicsObject(position, [100, 1], 5)
         self.dt = 1/fr
-        self.paddles = [Paddle(100, 700, RED_PADDLE_PATH), Paddle(1450, 700, BLACK_PADDLE_PATH)]
+        self.paddles = [Paddle(100, 700, RED_PADDLE_PATH), Paddle(1500, 700, BLACK_PADDLE_PATH)]
         self.surface = surface
         self.running = True
         self.key_set = set() # Keeping track of what keys are pressed, because Pygame and I are opps
