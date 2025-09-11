@@ -24,6 +24,7 @@ class GameEngine:
         self.key_set = set() # Keeping track of what keys are pressed, because Pygame and I are opps
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
+        self.alpha = 0
 
     def update(self):
         self.handle_input()
@@ -74,21 +75,11 @@ class GameEngine:
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
             (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
             y = -y
-            alpha = atan(-y/x) * 180 / pi # Angle between velocity vector and x-axis
-            _beta = 90 + atan(-self.paddles[1].a) * 180 / pi
-            beta = _beta if _beta < 90 else 180 - _beta
-            # epsilon = 2 * beta - alpha
-            epsilon =  180 + beta - 90 + 180 - 90 + alpha + beta
-            epsilon = 180 + epsilon
-            epsilon = epsilon * pi / 180
-            print(f"v = ({x}, {y})")
-            print(f"alpha: {alpha}")
-            print(f"_beta: {_beta}")
-            print(f"beta: {beta}")
-            print(f"epslion: {epsilon}")
-            print(f"{-self.paddles[1].a}x")
-            # input(">   ")
-            self.ball.velocity = VectorMath.scalar_mult([cos(epsilon), sin(epsilon)], VectorMath.length(self.ball.velocity))
+            _beta = atan(1 / -self.paddles[1].a) * 180 / pi
+            beta = 180 + _beta if _beta < 90 else 360 - _beta
+            beta = beta * pi / 180
+
+            self.ball.velocity = VectorMath.scalar_mult([cos(beta), sin(beta)], VectorMath.length(self.ball.velocity))
 
         if (self.ball.position[1] > 675 and self.ball.velocity[1] == abs(self.ball.velocity[1])):
             self.ball.velocity[1] *= -1
@@ -101,8 +92,11 @@ class GameEngine:
 
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
-
-        # print(self.paddles[0].angle)
+        
+        _beta = atan(1 / -self.paddles[1].a) * 180 / pi
+        self.beta = 180 + _beta if _beta < 90 else 360 - _beta
+        self.beta = self.beta * pi / 180
+        pygame.draw.line(self.surface, WHITE, (800, 450), (VectorMath.add([cos(self.beta) * 100, sin(self.beta) * 100], [800, 450])))
 
         pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
         pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
