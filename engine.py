@@ -1,9 +1,9 @@
 import pygame
 from pygame.locals import *
 
-from physicsobject import PhysicsObject
+from ball import Ball
 from paddle import Paddle
-from VecMath import VectorMath
+from vector import Vector2
 
 from math import cos, sin, atan, pi
 
@@ -15,16 +15,16 @@ WHITE = (255, 255, 255)
 PADDLE_SPEED = 50 # move to paddle.py if and only if we decide to do powerups or special abilities someday
 
 class GameEngine:
-    def __init__(self, fr: int, position: list, surface):
-        self.ball = PhysicsObject(position, [100, 1], 5)
+    def __init__(self, fr: int, position: Vector2, surface):
+        self.ball = Ball(position, Vector2(100, 1), 5, 10)
         self.dt = 1/fr
         self.paddles = [Paddle(100, 700, RED_PADDLE_PATH), Paddle(1500, 700, BLACK_PADDLE_PATH)]
         self.surface = surface
         self.running = True
         self.key_set = set() # Keeping track of what keys are pressed, because Pygame and I are opps
+
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
-        self.alpha = 0
 
     def update(self):
         self.handle_input()
@@ -37,84 +37,68 @@ class GameEngine:
 
     def update_position(self):
         # gravity
-        self.ball.velocity[1] = self.ball.velocity[1] + self.ball.acceleration * self.dt
+        self.ball.velocity.y = self.ball.velocity.y + self.ball.acceleration * self.dt
 
-        self.ball.position[0] = self.ball.position[0] + self.ball.velocity[0] * self.dt
-        self.ball.position[1] = self.ball.position[1] + self.ball.velocity[1] * self.dt
+        self.ball.position = self.ball.position + self.ball.velocity * self.dt
+
 
     
     def update_collision(self):
-        if (self.ball.position[1] + 10) > 900:
-            self.ball.velocity[1] = -self.ball.velocity[1]
-
-        if (self.ball.position[0] - 10) < 0 or (self.ball.position[0] + 10) > 1600:
-            self.ball.velocity[0] = -self.ball.velocity[0]
-
-        if (self.ball.position[1] < 0):
+        if (self.ball.position.y + 10) > 900:
             self.ball.velocity[1] *= -1
+
+        if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
+            self.ball.velocity.x *= -1
+
+        if (self.ball.position.y < 0):
+            self.ball.velocity.y *= -1
         
-        if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] < 0:
-            (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
-            y = -y
-            alpha = atan(-y/x) * -180 / pi # Angle between velocity vector and x-axis
-            _beta = 90 + atan(-self.paddles[0].a) * 180 / pi
+        if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x < 0:
+            _beta = atan(1 / -self.paddles[0].a) * 180 / pi
             beta = _beta if _beta < 90 else -180 + _beta
-            epsilon = 2 * beta - alpha
-            # epsilon =  beta - 90 + 180 - (90 - (beta - alpha))
-            epsilon = 360 - epsilon
-            epsilon = epsilon * pi / 180
-            # print(f"v = ({x}, {y})")
-            # print(f"alpha: {alpha}")
-            # print(f"_beta: {_beta}")
-            # print(f"beta: {beta}")
-            # print(f"epslion: {epsilon}")
-            # print(f"{-self.paddles[0].a}x")
-            # input(">   ")
-            self.ball.velocity = VectorMath.scalar_mult([cos(epsilon), sin(epsilon)], VectorMath.length(self.ball.velocity))
+            beta = beta * pi / 180
+            
+            self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
+
         
-        if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity[0] > 0:
-            (x, y) = VectorMath.scalar_mult(self.ball.velocity, -1)
-            y = -y
+        if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x > 0:
             _beta = atan(1 / -self.paddles[1].a) * 180 / pi
             beta = 180 + _beta if _beta < 90 else 360 - _beta
             beta = beta * pi / 180
 
-            self.ball.velocity = VectorMath.scalar_mult([cos(beta), sin(beta)], VectorMath.length(self.ball.velocity))
+            self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
 
-        if (self.ball.position[1] > 675 and self.ball.velocity[1] == abs(self.ball.velocity[1])):
-            self.ball.velocity[1] *= -1
+        if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
+            self.ball.velocity.y *= -1
 
     
     def update_screen(self):
         self.surface.blit(self.table_image, self.table_image.get_rect(center = self.table_image.get_rect(center = [800, 775]).center))
         
-        pygame.draw.circle(self.surface, WHITE, self.ball.position, 10)
+        # pygame.draw.circle(self.surface, WHITE, tuple(self.ball.position), self.ball.radius)
 
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
+        self.surface.blit(*self.ball.get_image())
+
         
-        _beta = atan(1 / -self.paddles[1].a) * 180 / pi
-        self.beta = 180 + _beta if _beta < 90 else 360 - _beta
-        self.beta = self.beta * pi / 180
-        pygame.draw.line(self.surface, WHITE, (800, 450), (VectorMath.add([cos(self.beta) * 100, sin(self.beta) * 100], [800, 450])))
 
         pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
         pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
-        pygame.draw.line(self.surface, WHITE, self.ball.position, VectorMath.add(self.ball.position, VectorMath.scalar_mult(self.ball.velocity, 50/VectorMath.length(self.ball.velocity))))
 
     def handle_input(self):
         # Position
         if pygame.K_w in self.key_set:
-            self.paddles[0].position[1] -= PADDLE_SPEED * self.dt
+            self.paddles[0].position.y -= PADDLE_SPEED * self.dt
         
         if pygame.K_s in self.key_set:
-            self.paddles[0].position[1] += PADDLE_SPEED * self.dt
+            self.paddles[0].position.y += PADDLE_SPEED * self.dt
 
         if pygame.K_UP in self.key_set:
-            self.paddles[1].position[1] -= PADDLE_SPEED * self.dt
+            self.paddles[1].position.y -= PADDLE_SPEED * self.dt
         
         if pygame.K_DOWN in self.key_set:
-            self.paddles[1].position[1] += PADDLE_SPEED * self.dt
+            self.paddles[1].position.y += PADDLE_SPEED * self.dt
 
         # Rotation
         if pygame.K_a in self.key_set:
