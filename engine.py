@@ -45,7 +45,7 @@ class GameEngine:
     
     def update_collision(self):
         if (self.ball.position.y + 10) > 900:
-            self.ball.velocity[1] *= -1
+            self.ball.velocity.y *= -1
 
         if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
             self.ball.velocity.x *= -1
@@ -69,22 +69,17 @@ class GameEngine:
             self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
 
         if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
-            self.ball.velocity.y *= -1
+            if  self.ball.position.x > 300 and self.ball.position.x < 1300: # Is the ball on the table
+                self.ball.velocity.y *= -1 # invert that velocity
+            # Here we should give point to the other player but that shi aint my job
 
     
     def update_screen(self):
         self.surface.blit(self.table_image, self.table_image.get_rect(center = self.table_image.get_rect(center = [800, 775]).center))
-        
-        # pygame.draw.circle(self.surface, WHITE, tuple(self.ball.position), self.ball.radius)
 
         self.surface.blit(*self.paddles[0].rotate_center()) # The star unpacks the tuple as arguments
         self.surface.blit(*self.paddles[1].rotate_center())
         self.surface.blit(*self.ball.get_image())
-
-        
-
-        pygame.draw.line(self.surface, WHITE, (0, self.paddles[0].b), (500, self.paddles[0].a * 500 + self.paddles[0].b))
-        pygame.draw.line(self.surface, WHITE, (1700, self.paddles[1].a * 1700 + self.paddles[1].b), (500, self.paddles[1].a * 500 + self.paddles[1].b))
 
     def handle_input(self):
         # Position
