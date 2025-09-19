@@ -3,6 +3,8 @@ from pygame.locals import *
 from math import sin, cos, pi, sqrt
 from src.math.vector import Vector2
 
+from src.game.engine import GameEngine
+
 class Paddle:
     def __init__(self, px, py, path, player):
         self.MAX_ANGLE = 30
@@ -36,6 +38,8 @@ class Paddle:
         if self.player == 2 and pygame.K_DOWN in self.key_set:
             self.position.y += self.SPEED * fr
 
+        self.position.y = max(min(self.position.y, GameEngine.window_size[1] - self.height/2), 0 + self.height/2)
+
         # Rotation
         if self.player == 1 and pygame.K_a in self.key_set:
             self.angle += 15 * fr
@@ -46,7 +50,7 @@ class Paddle:
         if self.player == 2 and pygame.K_RIGHT in self.key_set:
             self.angle += -15 * fr
 
-        self.angle = max(min(self.angle, self.MAX_ANGLE), self.MIN_ANGLE) # Clamping the angle
+        self.angle = max(min(self.angle, self.MAX_ANGLE), self.MIN_ANGLE)
         
         if self.prev_angle != self.angle:
             self.prev_angle = self.angle

@@ -3,11 +3,11 @@ from pygame.locals import *
 import sys
 
 class GameEngine:
+    window_size = (1600, 900)
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("2D настольный теннис")
-        self.window_size = (1600, 900)
-        self.surface = pygame.display.set_mode(self.window_size) 
+        self.surface = pygame.display.set_mode(GameEngine.window_size) 
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = None

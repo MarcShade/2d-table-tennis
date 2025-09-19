@@ -1,6 +1,6 @@
-from src.math.vector import Vector2
 import pygame
 from pygame.locals import *
+from src.math.vector import Vector2
 
 IMAGE_PATH = "assets/textures/ball.png"
 
