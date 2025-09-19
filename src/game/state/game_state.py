@@ -34,16 +34,7 @@ class GameState(State):
         self.ball.update(fr)
         self.update_collision()
 
-    def update_collision(self):
-        if (self.ball.position.y + 10) > 900:
-            self.ball.velocity.y *= -1
-
-        if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
-            self.ball.velocity.x *= -1
-
-        if (self.ball.position.y < 0):
-            self.ball.velocity.y *= -1
-        
+    def update_collision(self):       
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x < 0:
             _beta = atan(1 / -self.paddles[0].a) * 180 / pi
             beta = _beta if _beta < 90 else -180 + _beta

@@ -21,6 +21,16 @@ class Ball:
 
         self.position = self.position + self.velocity * dt
 
+        # wall collisions
+        if (self.position.y + 10) > 900:
+            self.velocity.y *= -1
+
+        if (self.position.x - 10) < 0 or (self.position.x + 10) > 1600:
+            self.velocity.x *= -1
+
+        if (self.position.y < 0):
+            self.velocity.y *= -1
+
     def draw(self, screen):
         screen.blit(*self.get_image())
     
