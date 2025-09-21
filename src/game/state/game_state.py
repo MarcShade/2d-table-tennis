@@ -19,13 +19,16 @@ class GameState(State):
     def __init__(self, engine):
         super().__init__(engine)
         self.acceleration = 5
-        self.ball = Ball(Vector2(900, 600), Vector2(100, 1), self.acceleration)
+        self.ball = Ball(Vector2(500, 500), Vector2(100, 1), self.acceleration)
         
         self.paddles = [Paddle(100, 700, RED_PADDLE_PATH, 1), Paddle(1500, 700, BLACK_PADDLE_PATH, 2)]
 
         self.background = pygame.image.load(BACKGROUND_PATH).convert()
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
+
+        self.last_hit = 0
+        self.points = [0, 0]
     
     def update(self, fr):
         # self.update_ball_position(fr)
@@ -43,6 +46,8 @@ class GameState(State):
             self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
             pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
 
+            self.last_hit = 0
+
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x > 0:
             _beta = atan(1 / -self.paddles[1].a) * 180 / pi
             beta = 180 + _beta if _beta < 90 else 360 - _beta
@@ -51,11 +56,27 @@ class GameState(State):
             self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
             pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
 
+            self.last_hit = 1
+
         if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
-            if  self.ball.position.x > 300 and self.ball.position.x < 1300: # Checking if the ball on the table
-                self.ball.velocity.y *= -1 # Inverting velocity
+            if self.ball.position.x > 300 and self.ball.position.x < 1300: # Checking if the ball on the table
+                self.ball.velocity.y *= -1
                 pygame.mixer.Sound(f"assets/sounds/tablehit{randint(1,2)}.mp3").play()
-            # Here points should be given to players
+            # Oh no! I missed the table
+        
+        # We should find another solution for giving points.
+        if (self.ball.position.y + 10) > 900:
+            self.ball.velocity.y *= -1 # Should be removed and replaced with a function to let another player serve
+            self.points[self.last_hit] += 1
+
+        if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
+            self.ball.velocity.x *= -1 # Should be removed and replaced with a function to let another player serve
+            self.points[self.last_hit] += 1
+
+        if (self.ball.position.y < 0):
+            self.ball.velocity.y *= -1 # Should be removed and replaced with a function to let another player serve
+            self.points[self.last_hit] += 1
+        print(self.points)
     
     def render(self, screen):
         screen.blit(self.background, (0, 0))
