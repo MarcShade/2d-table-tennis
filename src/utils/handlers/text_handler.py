@@ -1,4 +1,4 @@
-from src.game.utils.math.vector import Vector2
+from src.utils.math.vector import Vector2
 from src.game.engine import GameEngine
 
 

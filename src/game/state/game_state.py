@@ -3,8 +3,8 @@ import pygame
 from src.game.state.state import State
 from src.game.ball import Ball
 from src.game.paddle import Paddle
-from src.game.utils.math.vector import Vector2
-from src.game.utils.handlers.text_handler import TextHandler
+from src.utils.math.vector import Vector2
+from src.utils.handlers.text_handler import TextHandler
 
 from src.game.engine import GameEngine
 
@@ -41,7 +41,7 @@ class GameState(State):
         self.update_collision()
 
     def update_collision(self):       
-        if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x < 0:
+        if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x <= 0:
             _beta = atan(1 / -self.paddles[0].a) * 180 / pi
             beta = _beta if _beta < 90 else -180 + _beta
             beta = beta * pi / 180
@@ -51,7 +51,7 @@ class GameState(State):
 
             self.last_hit = 0
 
-        if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x > 0:
+        if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x >= 0:
             _beta = atan(1 / -self.paddles[1].a) * 180 / pi
             beta = 180 + _beta if _beta < 90 else 360 - _beta
             beta = beta * pi / 180
@@ -86,10 +86,8 @@ class GameState(State):
         for paddle in self.paddles:
             paddle.draw(screen)
 
-        p1_score = TextHandler(self.points[0], screen, Vector2(GameEngine.window_size[0]/2 - 300, 100), self.engine.font)
-        p1_score.render()
-        p2_score = TextHandler(self.points[1], screen, Vector2(GameEngine.window_size[0]/2 + 300, 100), self.engine.font)
-        p2_score.render()
+        TextHandler(self.points[0], screen, Vector2(GameEngine.window_size[0]/2 - 300, 100), self.engine.font).render()
+        TextHandler(self.points[1], screen, Vector2(GameEngine.window_size[0]/2 + 300, 100), self.engine.font).render()
 
 
     def handle_input(self, key_set):

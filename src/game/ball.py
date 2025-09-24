@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from src.game.utils.math.vector import Vector2
+from src.utils.math.vector import Vector2
 
 IMAGE_PATH = "assets/textures/ball.png"
 
@@ -29,7 +29,7 @@ class Ball:
 
         return (self.image, new_rect)
     
-    def serve(self, player): #TODO - finish this
+    def serve(self, player):
         if player not in [1, 2]:
             raise Exception("Not a valid player")
         self.velocity = Vector2(0, -75)
