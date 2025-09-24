@@ -4,15 +4,19 @@ import sys
 
 class GameEngine:
     window_size = (1600, 900)
+
     def __init__(self):
         pygame.init()
+        pygame.font.init()
         pygame.display.set_caption("2D настольный теннис")
         self.surface = pygame.display.set_mode(GameEngine.window_size) 
+        self.font = pygame.font.SysFont('Comic Sans MS', 100)
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = None
         # self.FPS = 144
         self.key_set = set()
+
 
     def run(self, initial_state):
         self.change_state(initial_state)

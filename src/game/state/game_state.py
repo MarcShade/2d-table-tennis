@@ -3,7 +3,10 @@ import pygame
 from src.game.state.state import State
 from src.game.ball import Ball
 from src.game.paddle import Paddle
-from src.math.vector import Vector2
+from src.game.utils.math.vector import Vector2
+from src.game.utils.handlers.text_handler import TextHandler
+
+from src.game.engine import GameEngine
 
 from math import cos, sin, atan, pi
 from random import randint
@@ -64,19 +67,17 @@ class GameState(State):
                 pygame.mixer.Sound(f"assets/sounds/tablehit{randint(1,2)}.mp3").play()
             # Oh no! I missed the table
         
-        # We should find another solution for giving points.
         if (self.ball.position.y + 10) > 900:
-            self.ball.velocity.y *= -1 # Should be removed and replaced with a function to let another player serve
+            self.ball.serve(1)
             self.points[self.last_hit] += 1
 
         if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
-            self.ball.velocity.x *= -1 # Should be removed and replaced with a function to let another player serve
+            self.ball.serve(2)
             self.points[self.last_hit] += 1
 
-        if (self.ball.position.y < 0):
-            self.ball.velocity.y *= -1 # Should be removed and replaced with a function to let another player serve
-            self.points[self.last_hit] += 1
-        print(self.points)
+        # if (self.ball.position.y < 0):
+        #     self.ball.serve(self.last_hit + 1)
+        #     self.points[self.last_hit] += 1
     
     def render(self, screen):
         screen.blit(self.background, (0, 0))
@@ -84,6 +85,12 @@ class GameState(State):
         self.ball.draw(screen)
         for paddle in self.paddles:
             paddle.draw(screen)
+
+        p1_score = TextHandler(self.points[0], screen, Vector2(GameEngine.window_size[0]/2 - 300, 100), self.engine.font)
+        p1_score.render()
+        p2_score = TextHandler(self.points[1], screen, Vector2(GameEngine.window_size[0]/2 + 300, 100), self.engine.font)
+        p2_score.render()
+
 
     def handle_input(self, key_set):
         for paddle in self.paddles:

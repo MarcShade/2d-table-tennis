@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 from math import sin, cos, pi, sqrt
-from src.math.vector import Vector2
+from src.game.utils.math.vector import Vector2
 
 from src.game.engine import GameEngine
 
