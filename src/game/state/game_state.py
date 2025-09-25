@@ -10,6 +10,7 @@ from src.game.engine import GameEngine
 
 from math import cos, sin, atan, pi
 from random import randint
+import time
 
 BACKGROUND_PATH = "assets/textures/background.jpg"
 RED_PADDLE_PATH = "assets/textures/redbat.png"
@@ -31,6 +32,8 @@ class GameState(State):
 
         self.last_hit = 0
         self.points = [0, 0]
+
+        self.new_rally(self.last_hit)
     
     def update(self, fr):
         # self.update_ball_position(fr)
@@ -67,18 +70,22 @@ class GameState(State):
             # Oh no! I missed the table
         
         if (self.ball.position.y + self.ball.radius) > 900:
-            self.new_rally(self.last_hit)
             self.points[self.last_hit] += 1
+            self.new_rally(self.last_hit)
 
         if (self.ball.position.x - self.ball.radius) < 0 or (self.ball.position.x + self.ball.radius) > 1600:
-            self.new_rally(self.last_hit)
             self.points[self.last_hit] += 1
+            self.new_rally(self.last_hit)
 
     def new_rally(self, serving_player):
+        if self.points[0] != 0 and self.points[1] != 0:
+            time.sleep(1)
         self.ball.velocity = Vector2(0, -75)
         self.ball.position = Vector2(self.paddles[serving_player].position.x, 400)
         self.paddles[0].position = Vector2(100, 600)
         self.paddles[1].position = Vector2(1500, 600)
+        self.paddles[0].angle = 0
+        self.paddles[1].angle = 0
     
     def render(self, screen):
         screen.blit(self.background, (0, 0))
