@@ -21,11 +21,10 @@ WHITE = (255, 255, 255)
 class GameState(State):
     def __init__(self, engine):
         super().__init__(engine)
-        self.acceleration = 5
+        self.acceleration = 9.82
         self.ball = Ball(Vector2(500, 500), Vector2(100, 1), self.acceleration)
         
-        self.paddles = [Paddle(100, 700, RED_PADDLE_PATH, 1), Paddle(1500, 700, BLACK_PADDLE_PATH, 2)]
-
+        self.paddles = [Paddle(100, 600, RED_PADDLE_PATH, 1), Paddle(1500, 600, BLACK_PADDLE_PATH, 2)]
         self.background = pygame.image.load(BACKGROUND_PATH).convert()
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
@@ -67,17 +66,19 @@ class GameState(State):
                 pygame.mixer.Sound(f"assets/sounds/tablehit{randint(1,2)}.mp3").play()
             # Oh no! I missed the table
         
-        if (self.ball.position.y + 10) > 900:
-            self.ball.serve(1)
+        if (self.ball.position.y + self.ball.radius) > 900:
+            self.new_rally(self.last_hit)
             self.points[self.last_hit] += 1
 
-        if (self.ball.position.x - 10) < 0 or (self.ball.position.x + 10) > 1600:
-            self.ball.serve(2)
+        if (self.ball.position.x - self.ball.radius) < 0 or (self.ball.position.x + self.ball.radius) > 1600:
+            self.new_rally(self.last_hit)
             self.points[self.last_hit] += 1
 
-        # if (self.ball.position.y < 0):
-        #     self.ball.serve(self.last_hit + 1)
-        #     self.points[self.last_hit] += 1
+    def new_rally(self, serving_player):
+        self.ball.velocity = Vector2(0, -75)
+        self.ball.position = Vector2(self.paddles[serving_player].position.x, 400)
+        self.paddles[0].position = Vector2(100, 600)
+        self.paddles[1].position = Vector2(1500, 600)
     
     def render(self, screen):
         screen.blit(self.background, (0, 0))
@@ -88,7 +89,6 @@ class GameState(State):
 
         TextHandler(self.points[0], screen, Vector2(GameEngine.window_size[0]/2 - 300, 100), self.engine.font).render()
         TextHandler(self.points[1], screen, Vector2(GameEngine.window_size[0]/2 + 300, 100), self.engine.font).render()
-
 
     def handle_input(self, key_set):
         for paddle in self.paddles:

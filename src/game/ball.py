@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+import time
 from src.utils.math.vector import Vector2
 
 IMAGE_PATH = "assets/textures/ball.png"
@@ -28,13 +29,3 @@ class Ball:
         new_rect = self.image.get_rect(center = self.image.get_rect(center = tuple(self.position)).center)
 
         return (self.image, new_rect)
-    
-    def serve(self, player):
-        if player not in [1, 2]:
-            raise Exception("Not a valid player")
-        self.velocity = Vector2(0, -75)
-
-        if player == 1:
-            self.position = Vector2(100, 700)
-        else:
-            self.position = Vector2(1500, 700)
