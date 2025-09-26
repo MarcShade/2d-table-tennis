@@ -8,9 +8,9 @@ from src.utils.handlers.text_handler import TextHandler
 
 from src.game.engine import GameEngine
 
-from math import cos, sin, atan, pi
 from random import randint
-import time
+from time import time, sleep
+
 
 BACKGROUND_PATH = "assets/textures/background.jpg"
 RED_PADDLE_PATH = "assets/textures/redbat.png"
@@ -44,24 +44,18 @@ class GameState(State):
 
     def update_collision(self):       
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x <= 0:
-            _beta = atan(1 / -self.paddles[0].a) * 180 / pi
-            beta = _beta if _beta < 90 else -180 + _beta
-            beta = beta * pi / 180
-            
-            self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
+            self.ball.velocity = self.paddles[0].compute_normal() * self.ball.velocity.length() * self.paddles[0].outgoing_velocity
             pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
-
             self.last_hit = 0
 
+            self.paddles[0].outgoing_velocity = 0.5
+
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x >= 0:
-            _beta = atan(1 / -self.paddles[1].a) * 180 / pi
-            beta = 180 + _beta if _beta < 90 else 360 - _beta
-            beta = beta * pi / 180
-
-            self.ball.velocity = Vector2(cos(beta), sin(beta)) * self.ball.velocity.length()
+            self.ball.velocity = self.paddles[1].compute_normal() * self.ball.velocity.length() * self.paddles[1].outgoing_velocity
             pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
-
             self.last_hit = 1
+
+            self.paddles[1].outgoing_velocity = 0.5
 
         if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
             if self.ball.position.x > 300 and self.ball.position.x < 1300: # Checking if the ball on the table
@@ -79,13 +73,11 @@ class GameState(State):
 
     def new_rally(self, serving_player):
         if self.points[0] != 0 and self.points[1] != 0:
-            time.sleep(1)
+            sleep(0.5)
         self.ball.velocity = Vector2(0, -75)
         self.ball.position = Vector2(self.paddles[serving_player].position.x, 400)
-        self.paddles[0].position = Vector2(100, 600)
-        self.paddles[1].position = Vector2(1500, 600)
-        self.paddles[0].angle = 0
-        self.paddles[1].angle = 0
+        self.paddles[0].reset()
+        self.paddles[1].reset()
     
     def render(self, screen):
         screen.blit(self.background, (0, 0))
@@ -100,3 +92,21 @@ class GameState(State):
     def handle_input(self, key_set):
         for paddle in self.paddles:
             paddle.handle_input(key_set)
+
+        if pygame.K_SPACE in key_set:
+            self.paddle_hit(0)
+        
+        if pygame.K_RSHIFT in key_set:
+            self.paddle_hit(1)
+    
+    def paddle_hit(self, index): # Probably shouldn't be done here
+        if time() - self.paddles[index].time_since_last_hit > self.paddles[index].delay:
+            self.paddles[index].time_since_last_hit = time()
+            dist = self.paddles[index].compute_dist_from_ball(self.ball.position)
+
+            if dist < 70: # Arbitrary value. Will be fine tuned
+                outgoing = (70 - dist) / 60 * 2 # Percentage of pixels away times a factor or something like that its not right as of right now
+                outgoing = max(min(outgoing, 3), 0.5) # Clamp the fucker
+                print(outgoing)
+                self.paddles[index].outgoing_velocity = outgoing 
+                self.paddles[index].animate()
