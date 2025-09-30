@@ -67,15 +67,6 @@ class Paddle:
         if self.prev_angle != self.angle:
             self.prev_angle = self.angle
 
-        # Animation
-        if time() - self.time_since_last_hit > self.delay:
-            if self.player == 1 and pygame.K_SPACE in self.key_set:
-                self.time_since_last_hit = time()
-                self.animate()
-            
-            if self.player == 2 and pygame.K_RSHIFT in self.key_set:
-                self.time_since_last_hit = time()
-                self.animate()
     
     def compute_normal(self):
         if self.player == 1:

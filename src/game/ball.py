@@ -12,9 +12,10 @@ class Ball:
         self.acceleration = acceleration
         self.radius = 10
         self.width = 2
+        self.table_hits = 0
 
         self.image = pygame.image.load(IMAGE_PATH).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.width*self.radius, self.width*self.radius))
+        self.image = pygame.transform.scale(self.image, (self.width * self.radius, self.width * self.radius))
 
     def update(self, dt):
         # gravity

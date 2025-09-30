@@ -41,38 +41,49 @@ class GameState(State):
             paddle.update(fr)
         self.ball.update(fr)
         self.update_collision()
+        self.validate_play()
+
+    def paddle_collision(self, paddle):
+        self.ball.velocity = self.paddles[paddle].compute_normal() * self.ball.velocity.length() * self.paddles[paddle].outgoing_velocity
+        pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
+        self.last_hit = paddle
+        self.ball.table_hits = 0
+
+        self.paddles[paddle].outgoing_velocity = 0.5
 
     def update_collision(self):       
         if self.paddles[0].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[0].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x <= 0:
-            self.ball.velocity = self.paddles[0].compute_normal() * self.ball.velocity.length() * self.paddles[0].outgoing_velocity
-            pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
-            self.last_hit = 0
-
-            self.paddles[0].outgoing_velocity = 0.5
+            self.paddle_collision(0)
 
         if self.paddles[1].compute_dist_from_ball(self.ball.position) < 10 and self.paddles[1].compute_center_dist(self.ball.position) < 75 and self.ball.velocity.x >= 0:
-            self.ball.velocity = self.paddles[1].compute_normal() * self.ball.velocity.length() * self.paddles[1].outgoing_velocity
-            pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
-            self.last_hit = 1
-
-            self.paddles[1].outgoing_velocity = 0.5
+            self.paddle_collision(1)
 
         if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
             if self.ball.position.x > 300 and self.ball.position.x < 1300: # Checking if the ball on the table
+                self.ball.table_hits += 1
                 self.ball.velocity.y *= -1
                 pygame.mixer.Sound(f"assets/sounds/tablehit{randint(1,2)}.mp3").play()
             # Oh no! I missed the table
-        
+    
+    def validate_play(self):
         if (self.ball.position.y + self.ball.radius) > 900:
             self.points[self.last_hit] += 1
             self.new_rally(self.last_hit)
+            return
 
         if (self.ball.position.x - self.ball.radius) < 0 or (self.ball.position.x + self.ball.radius) > 1600:
             self.points[self.last_hit] += 1
             self.new_rally(self.last_hit)
+            return
+        
+        if self.ball.table_hits > 2:
+            not_hit = (self.last_hit + 1) % 2
+            self.points[not_hit] += 1
+            self.ball.table_hits = 0
+            self.new_rally(not_hit)
 
     def new_rally(self, serving_player):
-        if self.points[0] != 0 and self.points[1] != 0:
+        if self.points[0] != 0 or self.points[1] != 0:
             sleep(0.5)
         self.ball.velocity = Vector2(0, -75)
         self.ball.position = Vector2(self.paddles[serving_player].position.x, 400)
@@ -99,14 +110,16 @@ class GameState(State):
         if pygame.K_RSHIFT in key_set:
             self.paddle_hit(1)
     
-    def paddle_hit(self, index): # Probably shouldn't be done here
-        if time() - self.paddles[index].time_since_last_hit > self.paddles[index].delay:
-            self.paddles[index].time_since_last_hit = time()
-            dist = self.paddles[index].compute_dist_from_ball(self.ball.position)
+    def paddle_hit(self, paddle): # Probably shouldn't be done here
+        if (time() - self.paddles[paddle].time_since_last_hit) > self.paddles[paddle].delay:
+            self.paddles[paddle].animate()
+
+            self.paddles[paddle].time_since_last_hit = time()
+            dist = self.paddles[paddle].compute_dist_from_ball(self.ball.position)
 
             if dist < 70: # Arbitrary value. Will be fine tuned
                 outgoing = (70 - dist) / 60 * 2 # Percentage of pixels away times a factor or something like that its not right as of right now
                 outgoing = max(min(outgoing, 3), 0.5) # Clamp the fucker
-                print(outgoing)
-                self.paddles[index].outgoing_velocity = outgoing 
-                self.paddles[index].animate()
+                self.paddles[paddle].outgoing_velocity = outgoing 
+                self.paddles[paddle].animate()
+                self.paddle_collision(paddle)
