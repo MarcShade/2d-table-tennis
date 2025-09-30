@@ -136,4 +136,3 @@ class Paddle:
             self.frames = 0
             self.allow_input = True
             self.position = self.saved_position
-            print("Done with animating")
