@@ -1,6 +1,4 @@
 from src.utils.math.vector import Vector2
-from src.game.engine import GameEngine
-
 
 class TextHandler:
     def __init__(self, text, screen, position: Vector2, font):

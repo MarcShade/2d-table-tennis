@@ -2,14 +2,16 @@ import pygame
 from pygame.locals import *
 import sys
 
-class GameEngine:
-    window_size = (1600, 900)
+from src.game.state.menu_state import MenuState
+from src.game.state.game_state import GameState
 
+class GameEngine:
     def __init__(self):
         pygame.init()
         pygame.font.init()
         pygame.display.set_caption("2D настольный теннис")
-        self.surface = pygame.display.set_mode(GameEngine.window_size) 
+        self.window_size = (1600, 900)
+        self.surface = pygame.display.set_mode(self.window_size) 
         self.font = pygame.font.SysFont('Comic Sans MS', 100)
         self.clock = pygame.time.Clock()
         self.running = True
@@ -17,6 +19,10 @@ class GameEngine:
         # self.FPS = 144
         self.key_set = set()
 
+        self.state_classes = {
+            "menu": MenuState,
+            "game": GameState,
+        }
 
     def run(self, initial_state):
         self.change_state(initial_state)
@@ -36,7 +42,10 @@ class GameEngine:
     def change_state(self, new_state):
         if self.state != None:
             self.state.exit()
-        self.state = new_state
+        if new_state not in self.state_classes:
+            raise ValueError(f"Unknown state: {new_state}")
+
+        self.state = self.state_classes[new_state](self)
         self.state.enter()
 
     def handle_input(self, events):

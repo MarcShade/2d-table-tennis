@@ -3,10 +3,9 @@ import pygame
 from src.game.state.state import State
 from src.game.ball import Ball
 from src.game.paddle import Paddle
+
 from src.utils.math.vector import Vector2
 from src.utils.handlers.text_handler import TextHandler
-
-from src.game.engine import GameEngine
 
 from random import randint
 from time import time, sleep
@@ -25,7 +24,7 @@ class GameState(State):
         self.acceleration = 9.82
         self.ball = Ball(Vector2(500, 500), Vector2(100, 1), self.acceleration)
         
-        self.paddles = [Paddle(100, 600, RED_PADDLE_PATH, 1), Paddle(1500, 600, BLACK_PADDLE_PATH, 2)]
+        self.paddles = [Paddle(100, 600, RED_PADDLE_PATH, 1, self.engine), Paddle(1500, 600, BLACK_PADDLE_PATH, 2, self.engine)]
         self.background = pygame.image.load(BACKGROUND_PATH).convert()
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
@@ -36,7 +35,6 @@ class GameState(State):
         self.new_rally(self.last_hit)
     
     def update(self, fr):
-        # self.update_ball_position(fr)
         for paddle in self.paddles:
             paddle.update(fr)
         self.ball.update(fr)
@@ -59,7 +57,7 @@ class GameState(State):
             self.paddle_collision(1)
 
         if (self.ball.position.y > 675 and self.ball.velocity.y == abs(self.ball.velocity.y)):
-            if self.ball.position.x > 300 and self.ball.position.x < 1300: # Checking if the ball on the table
+            if self.ball.position.x > 300 and self.ball.position.x < 1300:
                 self.ball.table_hits += 1
                 self.ball.velocity.y *= -1
                 pygame.mixer.Sound(f"assets/sounds/tablehit{randint(1,2)}.mp3").play()
@@ -97,8 +95,8 @@ class GameState(State):
         for paddle in self.paddles:
             paddle.draw(screen)
 
-        TextHandler(self.points[0], screen, Vector2(GameEngine.window_size[0]/2 - 300, 100), self.engine.font).render()
-        TextHandler(self.points[1], screen, Vector2(GameEngine.window_size[0]/2 + 300, 100), self.engine.font).render()
+        TextHandler(self.points[0], screen, Vector2(self.engine.window_size[0]/2 - 300, 100), self.engine.font).render()
+        TextHandler(self.points[1], screen, Vector2(self.engine.window_size[0]/2 + 300, 100), self.engine.font).render()
 
     def handle_input(self, key_set):
         for paddle in self.paddles:
@@ -109,6 +107,9 @@ class GameState(State):
         
         if pygame.K_RSHIFT in key_set:
             self.paddle_hit(1)
+
+        if pygame.K_r in key_set:
+                self.engine.change_state("menu")
     
     def paddle_hit(self, paddle): # Probably shouldn't be done here
         if (time() - self.paddles[paddle].time_since_last_hit) > self.paddles[paddle].delay:
@@ -119,7 +120,7 @@ class GameState(State):
 
             if dist < 70: # Arbitrary value. Will be fine tuned
                 outgoing = (70 - dist) / 60 * 2 # Percentage of pixels away times a factor or something like that its not right as of right now
-                outgoing = max(min(outgoing, 3), 0.5) # Clamp the fucker
+                outgoing = max(min(outgoing, 3), 0.5) # Clamp the value
                 self.paddles[paddle].outgoing_velocity = outgoing 
                 self.paddles[paddle].animate()
                 self.paddle_collision(paddle)

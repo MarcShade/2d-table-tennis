@@ -2,13 +2,14 @@ import pygame
 
 from pygame.locals import *
 from src.utils.math.vector import Vector2
-from src.game.engine import GameEngine
 
 from math import sin, cos, pi, sqrt, atan
 from time import time
 
 class Paddle:
-    def __init__(self, px, py, path, player):
+    def __init__(self, px, py, path, player, engine):
+        self.engine = engine
+
         self.MAX_ANGLE = 30
         self.MIN_ANGLE = -30
         self.SPEED = 50
@@ -50,7 +51,7 @@ class Paddle:
         if self.player == 2 and pygame.K_DOWN in self.key_set:
             self.position.y += self.SPEED * fr
 
-        self.position.y = max(min(self.position.y, GameEngine.window_size[1] - self.height/2), 0 + self.height/2)
+        self.position.y = max(min(self.position.y, self.engine.window_size[1] - self.height/2), 0 + self.height/2)
 
         # Rotation
         if self.player == 1 and pygame.K_a in self.key_set:
