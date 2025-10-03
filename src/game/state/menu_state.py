@@ -7,7 +7,7 @@ class MenuState:
         super().__init__()
         self.engine = engine
 
-        button_size = Vector2(300, 120)
+        button_size = Vector2(350, 180)
         screen_center = Vector2(
             engine.window_size[0] // 2, engine.window_size[1] // 2
         )
@@ -19,7 +19,7 @@ class MenuState:
             int(button_size.y),
         )
 
-        self.play_text = TextHandler("PLAY", engine.surface, screen_center, self.engine.font)
+        self.play_text = TextHandler("Играть", engine.surface, screen_center, self.engine.font)
 
     def enter(self):
         pass
@@ -44,4 +44,5 @@ class MenuState:
         mouse_pressed = pygame.mouse.get_pressed()
         if mouse_pressed[0]:
             if self.play_button.collidepoint(pygame.mouse.get_pos()):
-                self.engine.change_state("game")
+                from src.game.engine import StateEnum
+                self.engine.change_state(StateEnum.Game)

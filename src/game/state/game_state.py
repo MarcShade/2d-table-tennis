@@ -109,7 +109,8 @@ class GameState(State):
             self.paddle_hit(1)
 
         if pygame.K_r in key_set:
-                self.engine.change_state("menu")
+                from src.game.engine import StateEnum
+                self.engine.change_state(StateEnum.Menu)
     
     def paddle_hit(self, paddle): # Probably shouldn't be done here
         if (time() - self.paddles[paddle].time_since_last_hit) > self.paddles[paddle].delay:
