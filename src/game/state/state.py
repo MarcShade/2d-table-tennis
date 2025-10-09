@@ -9,7 +9,7 @@ class State():
     def exit(self):
         pass
 
-    def update(dt):
+    def update(self, fr):
         pass
 
     def handle_events(events):

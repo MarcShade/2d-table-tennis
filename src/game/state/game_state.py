@@ -10,7 +10,6 @@ from src.utils.handlers.text_handler import TextHandler
 from random import randint
 from time import time, sleep
 
-
 BACKGROUND_PATH = "assets/textures/background.jpg"
 RED_PADDLE_PATH = "assets/textures/redbat.png"
 BLACK_PADDLE_PATH = "assets/textures/blackbat.png"
@@ -29,10 +28,11 @@ class GameState(State):
         self.table_image = pygame.image.load(TABLE_PATH).convert_alpha()
         self.table_image = pygame.transform.scale(self.table_image, (1000, 500))
 
-        self.last_hit = 0
+        self.last_hit = None
+        self.hit_table = False
         self.points = [0, 0]
 
-        self.new_rally(self.last_hit)
+        self.new_rally(0)
     
     def update(self, fr):
         for paddle in self.paddles:
@@ -45,6 +45,7 @@ class GameState(State):
         self.ball.velocity = self.paddles[paddle].compute_normal() * self.ball.velocity.length() * self.paddles[paddle].outgoing_velocity
         pygame.mixer.Sound(f"assets/sounds/paddlehit1.mp3").play()
         self.last_hit = paddle
+        self.hit_table = False
         self.ball.table_hits = 0
 
         self.paddles[paddle].outgoing_velocity = 0.5
@@ -65,13 +66,21 @@ class GameState(State):
     
     def validate_play(self):
         if (self.ball.position.y + self.ball.radius) > 900:
-            self.points[self.last_hit] += 1
-            self.new_rally(self.last_hit)
+            if self.hit_table:
+                self.points[self.last_hit] += 1
+                self.new_rally(self.last_hit)
+            else:
+                self.points[(self.last_hit + 1) % 2] += 1
+                self.new_rally((self.last_hit + 1) % 2)
             return
 
         if (self.ball.position.x - self.ball.radius) < 0 or (self.ball.position.x + self.ball.radius) > 1600:
-            self.points[self.last_hit] += 1
-            self.new_rally(self.last_hit)
+            if self.hit_table:
+                self.points[self.last_hit] += 1
+                self.new_rally(self.last_hit)
+            else:
+                self.points[(self.last_hit + 1) % 2] += 1
+                self.new_rally((self.last_hit + 1) % 2)
             return
         
         if self.ball.table_hits > 2:
@@ -80,6 +89,11 @@ class GameState(State):
             self.ball.table_hits = 0
             self.new_rally(not_hit)
 
+        if self.points[0] == 1 or self.points[1] == 1:
+            from src.game.engine import StateEnum
+            self.restart()
+            self.engine.change_state(StateEnum.End)
+
     def new_rally(self, serving_player):
         if self.points[0] != 0 or self.points[1] != 0:
             sleep(0.5)
@@ -87,7 +101,17 @@ class GameState(State):
         self.ball.position = Vector2(self.paddles[serving_player].position.x, 400)
         self.paddles[0].reset()
         self.paddles[1].reset()
-    
+
+    def restart(self):
+        self.paddles[0].reset()
+        self.paddles[1].reset()
+
+        self.last_hit = None
+        self.hit_table = False
+        self.points = [0, 0]
+
+        self.new_rally(0)
+
     def render(self, screen):
         screen.blit(self.background, (0, 0))
         screen.blit(self.table_image, self.table_image.get_rect(center = self.table_image.get_rect(center = [800, 775]).center))
@@ -98,7 +122,7 @@ class GameState(State):
         TextHandler(self.points[0], screen, Vector2(self.engine.window_size[0]/2 - 300, 100), self.engine.font).render()
         TextHandler(self.points[1], screen, Vector2(self.engine.window_size[0]/2 + 300, 100), self.engine.font).render()
 
-    def handle_input(self, key_set):
+    def handle_input(self, key_set, events):
         for paddle in self.paddles:
             paddle.handle_input(key_set)
 
@@ -110,6 +134,7 @@ class GameState(State):
 
         if pygame.K_r in key_set:
                 from src.game.engine import StateEnum
+                self.restart()
                 self.engine.change_state(StateEnum.Menu)
     
     def paddle_hit(self, paddle): # Probably shouldn't be done here

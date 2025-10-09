@@ -7,6 +7,7 @@ from enum import Enum
 class StateEnum(Enum):
     Menu = "menu"
     Game = "game"
+    End = "end"
     
 class GameEngine:
     def __init__(self):
@@ -31,10 +32,12 @@ class GameEngine:
     def register_states(self):
         from src.game.state.menu_state import MenuState
         from src.game.state.game_state import GameState
+        from src.game.state.end_state import EndState
 
         self.state_classes = {
             StateEnum.Menu: MenuState,
             StateEnum.Game: GameState,
+            StateEnum.End: EndState
             }
 
     def run(self, initial_state):
@@ -71,4 +74,4 @@ class GameEngine:
                 self.key_set.add(event.key)
             elif event.type == pygame.KEYUP:
                 self.key_set.discard(event.key)
-        self.state.handle_input(self.key_set)
+        self.state.handle_input(self.key_set, events)
