@@ -1,2 +1,0 @@
-class SoundHandler:
-    pass
