@@ -8,6 +8,6 @@ class TextHandler:
         self.font = font
 
     def render(self):
-        text = self.font.render(self.text, 1, (0,0,0))
+        text = self.font.render(self.text, 1, (255,255,255))
         text_rect = text.get_rect(center=(self.position.x, self.position.y))
         self.screen.blit(text, text_rect)

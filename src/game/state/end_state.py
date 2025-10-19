@@ -10,7 +10,7 @@ class EndState(State):
         super().__init__(engine)
         self.engine = engine
 
-        button_size = Vector2(350, 180)
+        button_size = Vector2(380, 180)
         screen_center = Vector2(
             engine.window_size[0] // 2, engine.window_size[1] // 2
         )
