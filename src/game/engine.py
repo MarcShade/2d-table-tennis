@@ -13,7 +13,7 @@ class GameEngine:
     def __init__(self):
         pygame.init()
         pygame.font.init()
-        pygame.display.set_caption("2D настольный теннис")
+        pygame.display.set_caption("2D Table Tennis")
         self.window_size = (1600, 900)
         self.surface = pygame.display.set_mode(self.window_size) 
 
