@@ -89,7 +89,7 @@ class GameState(State):
             self.ball.table_hits = 0
             self.new_rally(not_hit)
 
-        if self.points[0] == 1 or self.points[1] == 1:
+        if self.points[0] == 11 or self.points[1] == 11:
             from src.game.engine import StateEnum
             self.restart()
             self.engine.change_state(StateEnum.End)
@@ -144,9 +144,9 @@ class GameState(State):
             self.paddles[paddle].time_since_last_hit = time()
             dist = self.paddles[paddle].compute_dist_from_ball(self.ball.position)
 
-            if dist < 70: # Arbitrary value. Will be fine tuned
-                outgoing = (70 - dist) / 60 * 2 # Percentage of pixels away times a factor or something like that its not right as of right now
-                outgoing = max(min(outgoing, 3), 0.5) # Clamp the value
+            if dist < 70 and self.paddles[paddle].compute_center_dist(self.ball.position) < 75: 
+                outgoing = (70 - dist) / 60 * 2
+                outgoing = max(min(outgoing, 3), 0.5) # Clamp the value, because Python provides no way of doing it automatically :(
                 self.paddles[paddle].outgoing_velocity = outgoing 
                 self.paddles[paddle].animate()
                 self.paddle_collision(paddle)
